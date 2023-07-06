@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -10,9 +11,24 @@ import (
 	"github.com/elazarl/goproxy"
 )
 
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			defer l.Close()
+			return l.Addr().(*net.TCPAddr).Port, nil
+		}
+	}
+	return
+}
+
 func run() error {
-	port := "31773"
-	addr := "localhost:" + port
+	port, err := GetFreePort()
+	if err != nil {
+		log.Fatalf("get free port to listen: %v", err)
+	}
+	addr := fmt.Sprintf("localhost:%v", port)
 
 	// Start HTTP proxy
 	proxy := goproxy.NewProxyHttpServer()
@@ -25,7 +41,7 @@ func run() error {
 	cmdline := []string{
 		"-t",                             // Force pty allocation
 		"-o", "ExitOnForwardFailure=yes", // Exit on forwarding failure
-		fmt.Sprintf("-R %s:%s", port, addr), // Forward the proxy port
+		fmt.Sprintf("-R %v:%s", port, addr), // Forward the proxy port
 	}
 	cmdline = append(cmdline, os.Args[1:]...) // Add all that user specified
 
