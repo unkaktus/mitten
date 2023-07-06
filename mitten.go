@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net"
@@ -9,6 +11,7 @@ import (
 	"os/exec"
 
 	"github.com/elazarl/goproxy"
+	"github.com/elazarl/goproxy/ext/auth"
 )
 
 func GetFreePort() (port int, err error) {
@@ -23,7 +26,22 @@ func GetFreePort() (port int, err error) {
 	return
 }
 
+func GenerateToken() string {
+	size := 16
+	rb := make([]byte, size)
+	_, err := rand.Read(rb)
+
+	if err != nil {
+		panic(err)
+	}
+
+	rs := base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(rb)
+	return rs
+}
+
 func run() error {
+	token := GenerateToken()
+
 	port, err := GetFreePort()
 	if err != nil {
 		log.Fatalf("get free port to listen: %v", err)
@@ -32,6 +50,9 @@ func run() error {
 
 	// Start HTTP proxy
 	proxy := goproxy.NewProxyHttpServer()
+	auth.ProxyBasic(proxy, "mitten", func(user, password string) bool {
+		return user == "mitten" && password == token
+	})
 	go func() {
 		if err := http.ListenAndServe(addr, proxy); err != nil {
 			log.Fatalf("listen and serve: %v", err)
@@ -47,7 +68,7 @@ func run() error {
 
 	// Export the environment variables and start a shell
 	cmdline = append(cmdline,
-		fmt.Sprintf("export http_proxy=\"http://%s\"; export https_proxy=\"http://%s\"; exec $SHELL -l", addr, addr),
+		fmt.Sprintf("export http_proxy=\"http://mitten:%s@%s\"; export https_proxy=\"http://mitten:%s@%s\"; exec $SHELL -l", token, addr, token, addr),
 	)
 
 	cmd := exec.Command("ssh", cmdline...)

@@ -2,7 +2,9 @@
 
 `mitten` is a drop-in replacement for SSH that brings internet connection
 to the machines without it.
-For now, works only as an HTTP/HTTPS proxy.
+
+For now, works only as an HTTP/HTTPS proxy. It protects itself against other
+users on the same machine automatically.
 
 ### Building
 
