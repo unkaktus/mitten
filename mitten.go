@@ -30,7 +30,7 @@ func run() error {
 
 	// Export the environment variables and start a shell
 	cmdline = append(cmdline,
-		fmt.Sprintf("export http_proxy=\"http://%s\"; export https_proxy=\"http://%s\"; $SHELL", addr, addr),
+		fmt.Sprintf("export http_proxy=\"http://%s\"; export https_proxy=\"http://%s\"; exec $SHELL -l", addr, addr),
 	)
 
 	cmd := exec.Command("ssh", cmdline...)
