@@ -23,7 +23,8 @@ func run() error {
 	}()
 
 	cmdline := []string{
-		"-t",                                // Force pty allocation
+		"-t",                             // Force pty allocation
+		"-o", "ExitOnForwardFailure=yes", // Exit on forwarding failure
 		fmt.Sprintf("-R %s:%s", port, addr), // Forward the proxy port
 	}
 	cmdline = append(cmdline, os.Args[1:]...) // Add all that user specified
