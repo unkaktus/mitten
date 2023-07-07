@@ -40,6 +40,10 @@ func GenerateToken() string {
 }
 
 func run() error {
+	if len(os.Args) == 1 {
+		log.Fatalf("Specify the host")
+	}
+
 	token := GenerateToken()
 
 	port, err := GetFreePort()
