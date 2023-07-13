@@ -4,14 +4,21 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
 
+	"github.com/creack/pty"
 	"github.com/elazarl/goproxy"
 	"github.com/elazarl/goproxy/ext/auth"
+	"golang.org/x/term"
 )
 
 func GetFreePort() (port int, err error) {
@@ -38,6 +45,21 @@ func GenerateToken() string {
 	rs := base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(rb)
 	return rs
 }
+
+const banner string = `
+       ▗▟▀▀▙                   
+      ▗▛   ▐▌                
+    ▗▟▘   ▗▛                            
+▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄                  
+█  █              ▝▜▖           
+█  █                ▙            
+█  █               ▗▌              
+▜▄▄█▄            ▗▟▀              
+     ▀▀▀▀▄▄▄▄▄▄▄▀▀            
+   mitten mittens!    
+`
+
+var bannerHeight int = strings.Count(banner, "\n")
 
 func run() error {
 	if len(os.Args) == 1 {
@@ -70,18 +92,50 @@ func run() error {
 	}
 	cmdline = append(cmdline, os.Args[1:]...) // Add all that user specified
 
-	// Export the environment variables and start a shell
-	cmdline = append(cmdline,
-		fmt.Sprintf("export http_proxy=\"http://mitten:%s@%s\"; export https_proxy=\"http://mitten:%s@%s\"; exec $SHELL -l", token, addr, token, addr),
-	)
-
 	cmd := exec.Command("ssh", cmdline...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+
+	// Start the command with a pty.
+	ptmx, err := pty.Start(cmd)
+	if err != nil {
 		return fmt.Errorf("execute ssh: %w", err)
 	}
+	// Make sure to close the pty at the end.
+	defer func() { ptmx.Close() }() // Best effort.
+
+	// Handle pty size.
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGWINCH)
+	go func() {
+		for range ch {
+			if err := pty.InheritSize(os.Stdin, ptmx); err != nil {
+				log.Printf("error resizing pty: %s", err)
+			}
+		}
+	}()
+	ch <- syscall.SIGWINCH                        // Initial resize.
+	defer func() { signal.Stop(ch); close(ch) }() // Cleanup signals when done.
+
+	// Set stdin in raw mode.
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		panic(err)
+	}
+	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
+
+	// Export the environment variables
+	mittenCommand := fmt.Sprintf(`export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';
+`, token, addr, bannerHeight+1, banner)
+
+	// Copy stdin to the pty and the pty to stdout.
+	go func() {
+		time.Sleep(5 * time.Second)
+		_, err := io.Copy(ptmx, strings.NewReader(mittenCommand))
+		if err != nil {
+			log.Fatalf("write mitten command to the remote: %v", err)
+		}
+		_, _ = io.Copy(ptmx, os.Stdin)
+	}()
+	_, _ = io.Copy(os.Stdout, ptmx)
 
 	return nil
 }
