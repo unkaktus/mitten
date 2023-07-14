@@ -32,6 +32,18 @@ With `mitten`, it doesn't:
 
 ```
 $ mitten supercomp
+
+       ▗▟▀▀▙
+      ▗▛   ▐▌
+    ▗▟▘   ▗▛
+▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄
+█  █              ▝▜▖
+█  █                ▙
+█  █               ▗▌
+▜▄▄█▄            ▗▟▀
+     ▀▀▀▀▄▄▄▄▄▄▄▀▀
+   mitten mittens!
+
 supercomp> curl -I unkaktus.art
 HTTP/1.1 308 Permanent Redirect
 ```
