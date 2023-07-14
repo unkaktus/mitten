@@ -3,6 +3,7 @@ module github.com/unkaktus/mitten
 go 1.20
 
 require (
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/creack/pty v1.1.18
 	github.com/elazarl/goproxy v0.0.0-20221015165544-a0805db90819
 	github.com/elazarl/goproxy/ext v0.0.0-20221015165544-a0805db90819

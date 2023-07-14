@@ -13,7 +13,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/creack/pty"
 	"github.com/elazarl/goproxy"
@@ -123,19 +122,23 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(`export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';
-`, token, addr, bannerHeight+1, banner)
+	mittenCommand := fmt.Sprintf(`export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';`+"\n", token, addr, bannerHeight+1, banner)
+
+	shellFinder := NewShellFindReader(ptmx)
 
 	// Copy stdin to the pty and the pty to stdout.
 	go func() {
-		time.Sleep(5 * time.Second)
+		_, _ = io.Copy(ptmx, os.Stdin)
+	}()
+
+	go func() {
+		<-shellFinder.Found
 		_, err := io.Copy(ptmx, strings.NewReader(mittenCommand))
 		if err != nil {
 			log.Fatalf("write mitten command to the remote: %v", err)
 		}
-		_, _ = io.Copy(ptmx, os.Stdin)
 	}()
-	_, _ = io.Copy(os.Stdout, ptmx)
+	_, _ = io.Copy(os.Stdout, shellFinder)
 
 	return nil
 }
