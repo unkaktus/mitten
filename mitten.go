@@ -122,7 +122,7 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(`export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';`+"\n", token, addr, bannerHeight+1, banner)
+	mittenCommand := fmt.Sprintf(` export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';`+"\n", token, addr, bannerHeight+1, banner)
 
 	shellFinder := NewShellFindReader(ptmx)
 
