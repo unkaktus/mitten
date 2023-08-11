@@ -62,14 +62,14 @@ var bannerHeight int = strings.Count(banner, "\n")
 
 func run() error {
 	if len(os.Args) == 1 {
-		log.Fatalf("Specify the host")
+		return fmt.Errorf("no host specified")
 	}
 
 	token := GenerateToken()
 
 	port, err := GetFreePort()
 	if err != nil {
-		log.Fatalf("get free port to listen: %v", err)
+		return fmt.Errorf("get free port to listen: %w", err)
 	}
 	addr := fmt.Sprintf("localhost:%v", port)
 
@@ -122,7 +122,8 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(` export http_proxy="http://mitten:%s@%s"; export https_proxy=$http_proxy; echo -e '\e[1A\e[K\n\e[%dA\e[K%s';`+"\n", token, addr, bannerHeight+1, banner)
+	mittenCommand := fmt.Sprintf(` export http_proxy="http://mitten:%s@%s";export https_proxy=$http_proxy;echo -e '\e[1A\e[K\n\e[%dA\e[K%s';
+`, token, addr, bannerHeight+2, banner)
 
 	shellFinder := NewShellFindReader(ptmx)
 
@@ -145,7 +146,7 @@ func run() error {
 
 func main() {
 	if err := run(); err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "mitten: %v\n", err)
+		os.Exit(1)
 	}
-
 }
