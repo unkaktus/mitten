@@ -1,0 +1,16 @@
+context:
+  version: 1.0.0
+package:
+  name: "mitten"
+  version: '{{ version }}'
+
+source:
+  path: .
+
+requirements:
+  build:
+    - go
+
+build:
+  script:
+    - env CGO_ENABLED=0 go build -o ${PREFIX}/bin/mitten .
