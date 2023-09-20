@@ -3,10 +3,17 @@
 `mitten` is a drop-in replacement for SSH that brings internet connection
 to the machines without it.
 
-For now, works only as an HTTP/HTTPS proxy. It protects itself against other
+For now, it works only as an HTTP/HTTPS proxy. It protects itself against other
 users on the same machine automatically.
 
-### Building
+### Easy installation using Mamba
+
+Having MambaForge installed, install `mitten` package:
+```shell
+mamba install -c https://mamba.unkaktus.art mitten
+```
+
+### Installation using Go
 
 0. Install Go (https://go.dev, `brew install go`, `conda install go`)
 
@@ -18,10 +25,10 @@ go install github.com/unkaktus/mitten@latest
 ```shell
 export PATH="$HOME/go/bin:$PATH"
 ```
-You would probably want to have it permanently, so put into your shellrc.
+You would probably want to have it permanently, so put it into your shellrc.
 
 ### Example use
-Normally, connection fails:
+Normally, the connection fails:
 ```
 $ ssh supercomp
 supercomp> curl -I unkaktus.art
