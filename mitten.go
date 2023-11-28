@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -15,8 +14,6 @@ import (
 	"syscall"
 
 	"github.com/creack/pty"
-	"github.com/elazarl/goproxy"
-	"github.com/elazarl/goproxy/ext/auth"
 	"golang.org/x/term"
 )
 
@@ -60,34 +57,31 @@ const banner string = `
 
 var bannerHeight int = strings.Count(banner, "\n")
 
+type Tunnel struct {
+	Command     string
+	ForwardSpec string
+}
+
 func run() error {
 	if len(os.Args) == 1 {
 		return fmt.Errorf("no host specified")
 	}
 
-	token := GenerateToken()
-
-	port, err := GetFreePort()
+	httpProxyTunnel, err := setupHTTPProxy()
 	if err != nil {
-		return fmt.Errorf("get free port to listen: %w", err)
+		return fmt.Errorf("create HTTP proxy: %w", err)
 	}
-	addr := fmt.Sprintf("localhost:%v", port)
 
-	// Start HTTP proxy
-	proxy := goproxy.NewProxyHttpServer()
-	auth.ProxyBasic(proxy, "mitten", func(user, password string) bool {
-		return user == "mitten" && password == token
-	})
-	go func() {
-		if err := http.ListenAndServe(addr, proxy); err != nil {
-			log.Fatalf("listen and serve: %v", err)
-		}
-	}()
+	sftpTunnel, err := setupSFTP()
+	if err != nil {
+		return fmt.Errorf("create HTTP proxy: %w", err)
+	}
 
 	cmdline := []string{
 		"-t",                             // Force pty allocation
 		"-o", "ExitOnForwardFailure=yes", // Exit on forwarding failure
-		fmt.Sprintf("-R %v:%s", port, addr), // Forward the proxy port
+		httpProxyTunnel.ForwardSpec, // Forward the proxy port
+		sftpTunnel.ForwardSpec,      // Forward the SFTP port
 	}
 	cmdline = append(cmdline, os.Args[1:]...) // Add all that user specified
 
@@ -122,8 +116,8 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(` export http_proxy="http://mitten:%s@%s";export https_proxy=$http_proxy;echo -e '\e[1A\e[K\n\e[%dA\e[K%s';
-`, token, addr, bannerHeight+2, banner)
+	mittenCommand := fmt.Sprintf(` %s%secho -e '\e[1A\e[K\n\e[%dA\e[K%s';
+`, httpProxyTunnel.Command, sftpTunnel.Command, bannerHeight+2, banner)
 
 	shellFinder := NewShellFindReader(ptmx)
 
