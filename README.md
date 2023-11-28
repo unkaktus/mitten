@@ -1,14 +1,57 @@
 ## 🧤 mitten 🧤
 
 `mitten` is a drop-in replacement for SSH that brings internet connection
-to the machines without it.
+to the machines without it, and enables easy transfer of local files
+to the remote via SFTP.
+Only you can use the connection and have the access to the local files.
 
-For now, it works only as an HTTP/HTTPS proxy. It protects itself against other
-users on the same machine automatically.
+### Internet demo
+Normally, on machines with no internet access, calls like these fail or hang:
+```
+$ ssh supercomp
+supercomp> curl -I https://unkaktus.art
+curl: (7) Failed to connect to unkaktus.art port 443: Network is unreachable
+```
+
+With `mitten`, they work through your local connection:
+
+```
+$ mitten supercomp
+
+       ▗▟▀▀▙
+      ▗▛   ▐▌
+    ▗▟▘   ▗▛
+▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄
+█  █              ▝▜▖
+█  █                ▙
+█  █               ▗▌
+▜▄▄█▄            ▗▟▀
+     ▀▀▀▀▄▄▄▄▄▄▄▀▀
+   mitten mittens!
+
+supercomp> curl -I https://unkaktus.art
+HTTP/1.1 308 Permanent Redirect
+```
+
+Mitten magic!
+
+### File transfer demo
+To easily transfer files between the local machine and the remote,
+use `mittenfs` command after logging in, which provides `sftp` interface:
+
+```shell
+$ mitten supercomp
+supercomp> mittenfs
+supercomp> sftp> get mitten.go .
+supercomp> sftp> lls
+mitten.go
+```
+
+Mitten magic!
 
 ### Easy installation using Mamba
 
-Having MambaForge installed, install `mitten` package:
+Having [MambaForge installed](https://github.com/conda-forge/miniforge#install), install `mitten` package:
 ```shell
 mamba install -c https://mamba.unkaktus.art mitten
 ```
@@ -26,31 +69,3 @@ go install github.com/unkaktus/mitten@latest
 export PATH="$HOME/go/bin:$PATH"
 ```
 You would probably want to have it permanently, so put it into your shellrc.
-
-### Example use
-Normally, the connection fails:
-```
-$ ssh supercomp
-supercomp> curl -I unkaktus.art
-curl: (7) Failed to connect to unkaktus.art port 80: Network is unreachable
-```
-
-With `mitten`, it doesn't:
-
-```
-$ mitten supercomp
-
-       ▗▟▀▀▙
-      ▗▛   ▐▌
-    ▗▟▘   ▗▛
-▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄
-█  █              ▝▜▖
-█  █                ▙
-█  █               ▗▌
-▜▄▄█▄            ▗▟▀
-     ▀▀▀▀▄▄▄▄▄▄▄▀▀
-   mitten mittens!
-
-supercomp> curl -I unkaktus.art
-HTTP/1.1 308 Permanent Redirect
-```
