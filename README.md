@@ -1,8 +1,8 @@
 ## 🧤 mitten 🧤
 
 `mitten` is a drop-in replacement for SSH that brings internet connection
-to the machines without it, and enables easy transfer of local files
-to the remote via SFTP.
+to the machines without it, and enables easy file transfer between the local
+and remote machines.
 Only you can use the connection and have the access to the local files.
 
 ### Internet demo
