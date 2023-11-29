@@ -116,8 +116,7 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(` %s%secho -e '\e[1A\e[K\n\e[%dA\e[K%s';
-`, httpProxyTunnel.Command, sftpTunnel.Command, bannerHeight+2, banner)
+	mittenCommand := fmt.Sprintf(` %s%secho -e '%s';#mitten_marker#`, httpProxyTunnel.Command, sftpTunnel.Command, banner)
 
 	shellFinder := NewShellFindReader(ptmx)
 
@@ -129,6 +128,11 @@ func run() error {
 	go func() {
 		<-shellFinder.Found
 		_, err := io.Copy(ptmx, strings.NewReader(mittenCommand))
+		if err != nil {
+			log.Fatalf("write mitten command to the remote: %v", err)
+		}
+		<-shellFinder.SkippedEcho
+		_, err = ptmx.Write([]byte("\n"))
 		if err != nil {
 			log.Fatalf("write mitten command to the remote: %v", err)
 		}
