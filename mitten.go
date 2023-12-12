@@ -43,16 +43,15 @@ func GenerateToken() string {
 }
 
 const banner string = `
-       ▗▟▀▀▙                   
-      ▗▛   ▐▌                
-    ▗▟▘   ▗▛                            
-▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄                  
-█  █              ▝▜▖           
-█  █                ▙            
-█  █               ▗▌              
-▜▄▄█▄            ▗▟▀              
-     ▀▀▀▀▄▄▄▄▄▄▄▀▀            
-   mitten mittens!    
+       ▗▟▀▀▙
+      ▗▛   ▐▌
+    ▗▟▘   ▗▛
+▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄
+█  █              ▝▜▖
+█  █      mitten    ▙
+█  █      magic!   ▗▌
+▜▄▄█▄            ▗▟▀
+     ▀▀▀▀▄▄▄▄▄▄▄▀▀      
 `
 
 var bannerHeight int = strings.Count(banner, "\n")
