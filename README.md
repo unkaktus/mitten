@@ -54,10 +54,10 @@ Mitten magic!
 1. Download and install the binary for your platform. For example, for Linux on AMD64:
 
 ```shell
-curl -L -o robin https://github.com/unkaktus/mitten/releases/latest/download/robin-linux-amd64
+curl -L -o mitten https://github.com/unkaktus/mitten/releases/latest/download/mitten-linux-amd64
 mkdir -p ~/bin
-mv robin ~/bin/
-chmod +x ~/bin/robin
+mv mitten ~/bin/
+chmod +x ~/bin/mitten
 ```
 
 Add $HOME/bin into your $PATH into your .bashrc:
