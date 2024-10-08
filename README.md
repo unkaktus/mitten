@@ -23,11 +23,11 @@ $ mitten supercomp
     ▗▟▘   ▗▛
 ▗▄▄▟▀     ▀▀▀▀▀▀▀▜▄
 █  █              ▝▜▖
-█  █                ▙
-█  █               ▗▌
+█  █      mitten    ▙
+█  █      magic!   ▗▌
 ▜▄▄█▄            ▗▟▀
      ▀▀▀▀▄▄▄▄▄▄▄▀▀
-   mitten mittens!
+
 
 supercomp> curl -I https://unkaktus.art
 HTTP/1.1 308 Permanent Redirect
@@ -42,18 +42,27 @@ use `mittenfs` command after logging in, which provides `sftp` interface:
 ```shell
 $ mitten supercomp
 supercomp> mittenfs
-supercomp> sftp> get mitten.go .
+supercomp> sftp> get local_file.dat .
 supercomp> sftp> lls
-mitten.go
+local_file.dat
 ```
 
 Mitten magic!
 
-### Easy installation using Mamba
+### Binary installation
 
-Having [MambaForge installed](https://github.com/conda-forge/miniforge#install), install `mitten` package:
+1. Download and install the binary for your platform. For example, for Linux on AMD64:
+
 ```shell
-mamba install -c https://mamba.unkaktus.art mitten
+curl -L -o robin https://github.com/unkaktus/mitten/releases/latest/download/robin-linux-amd64
+mkdir -p ~/bin
+mv robin ~/bin/
+chmod +x ~/bin/robin
+```
+
+Add $HOME/bin into your $PATH into your .bashrc:
+```shell
+export PATH="$HOME/bin:$PATH"
 ```
 
 ### Installation using Go
