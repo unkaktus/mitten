@@ -56,6 +56,8 @@ const banner string = `
 
 var bannerHeight int = strings.Count(banner, "\n")
 
+const mittenMarker string = "MITTEN=true"
+
 type Tunnel struct {
 	Command     string
 	ForwardSpec string
@@ -115,7 +117,7 @@ func run() error {
 	defer func() { term.Restore(int(os.Stdin.Fd()), oldState) }() // Best effort.
 
 	// Export the environment variables
-	mittenCommand := fmt.Sprintf(` %s%secho -e '%s';#mitten_marker#`, httpProxyTunnel.Command, sftpTunnel.Command, banner)
+	mittenCommand := fmt.Sprintf(` %s%secho -e '%s';`+mittenMarker, httpProxyTunnel.Command, sftpTunnel.Command, banner)
 
 	shellFinder := NewShellFindReader(ptmx)
 

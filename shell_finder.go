@@ -42,7 +42,7 @@ func (sfr *ShellFindReader) Read(p []byte) (int, error) {
 			)
 			accumulated = stripansi.Strip(accumulated)
 			if accumulated != "" {
-				if strings.Contains(accumulated, "#mitten_marker#") {
+				if strings.Contains(accumulated, mittenMarker) {
 					sfr.Enabled = true
 					sfr.builder.Reset()
 					close(sfr.SkippedEcho)
