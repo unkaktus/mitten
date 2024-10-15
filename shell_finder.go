@@ -53,18 +53,20 @@ func (sfr *ShellFindReader) Read(p []byte) (int, error) {
 		return sfr.reader.Read(p)
 	default:
 		n, err := sfr.teeReader.Read(p)
-		accumulated := strings.TrimSpace(
-			sfr.builder.String(),
-		)
+		accumulated := sfr.builder.String()
 		accumulated = stripansi.Strip(accumulated)
+		accumulated = strings.TrimSpace(accumulated)
+
 		if accumulated != "" {
-			if strings.HasSuffix(accumulated, "$") || strings.HasSuffix(accumulated, "#") || strings.HasSuffix(accumulated, ">") {
-				// Check if two characters are not the same
-				if accumulated[len(accumulated)-1] != accumulated[len(accumulated)-2] {
-					close(sfr.Found)
-					sfr.Enabled = false
-					sfr.builder.Reset()
+			switch rune(accumulated[len(accumulated)-1]) {
+			case '$', '#', '>', '%':
+				// Skip the two last characters are the same (banners)
+				if accumulated[len(accumulated)-1] == accumulated[len(accumulated)-2] {
+					break
 				}
+				close(sfr.Found)
+				sfr.Enabled = false
+				sfr.builder.Reset()
 			}
 		}
 		return n, err
