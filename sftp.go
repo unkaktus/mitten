@@ -66,7 +66,7 @@ func setupSFTP() (*Tunnel, error) {
 	}()
 
 	// Generate a key to enable authentication
-	keygenCommand := "ssh-keygen -t ed25519 -f $HOME/.ssh/mitten_key -N '' -q  <<<y >/dev/null 2>&1"
+	keygenCommand := "echo y | ssh-keygen -t ed25519 -f $HOME/.ssh/mitten_key -N '' -q >/dev/null 2>&1"
 	// Invoke sftp
 	sftpCommand := fmt.Sprintf("sftp -o Port=%d -o User=%s -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i $HOME/.ssh/mitten_key -q localhost", port, token)
 
