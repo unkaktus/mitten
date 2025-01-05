@@ -78,3 +78,10 @@ go install github.com/unkaktus/mitten@latest
 export PATH="$HOME/go/bin:$PATH"
 ```
 You would probably want to have it permanently, so put it into your shellrc.
+
+
+### A note on OpenWRT
+
+Certain apps, such as `opkg` of OpenWRT, don't support HTTP proxy authentication.
+One can disable this authentication by setting `MITTEN_DISABLE_PROXY_AUTH=yes`.
+Note that it is, of course, **insecure**.

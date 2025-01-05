@@ -68,7 +68,9 @@ func run() error {
 		return fmt.Errorf("no host specified")
 	}
 
-	httpProxyTunnel, err := setupHTTPProxy()
+	disableAuth := os.Getenv("MITTEN_DISABLE_PROXY_AUTH") == "yes"
+
+	httpProxyTunnel, err := setupHTTPProxy(disableAuth)
 	if err != nil {
 		return fmt.Errorf("create HTTP proxy: %w", err)
 	}
