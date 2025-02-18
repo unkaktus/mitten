@@ -3,7 +3,11 @@
 `mitten` is a drop-in replacement for SSH that brings internet connection
 to the machines without it, and enables easy file transfer between the local
 and remote machines.
-Only you can use the connection and have the access to the local files.
+There is built-in authentication, so only the user inside of the mitten session
+can use the connection and have the access to the local files.
+
+A common use case for mitten is installing packages in Conda/Miniforge environments
+which rely on fetching the them from the internet.
 
 ### Internet demo
 Normally, on machines with no internet access, calls like these fail or hang:
@@ -85,3 +89,16 @@ You would probably want to have it permanently, so put it into your shellrc.
 Certain apps, such as `opkg` of OpenWRT, don't support HTTP proxy authentication.
 One can disable this authentication by setting `MITTEN_DISABLE_PROXY_AUTH=yes`.
 Note that it is, of course, **insecure**.
+
+
+### How it works
+
+Behind the scenes, _mitten_ launches an HTTP(S) proxy, and starts an SSH session with
+forwarding of the local proxy port to the remote machine. After the connection is made,
+and the user logged in, the shell prompt is getting detected. Then, _mitten_ types in
+a shell command which exports `http_proxy` environment variables with the address and
+authentication credentials set pointing to the forwarded connection. Because of this,
+only the current SSH session has the password available, so other users and other
+sessions are not able to use the proxy. After all these steps are done, the _mitten_
+thumbs-up banner is displayed, and the user can use any tools that automatically pick up
+the HTTP proxy configuration to access internet resources.
