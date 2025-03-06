@@ -55,10 +55,10 @@ Mitten magic!
 
 ### Binary installation
 
-1. Download and install the binary for your platform. For example, for Linux on AMD64:
+1. Download and install the binary for your platform. To do it one go, run
 
 ```shell
-curl -L -o mitten https://github.com/unkaktus/mitten/releases/latest/download/mitten-linux-amd64
+curl -L -o mitten https://github.com/unkaktus/mitten/releases/latest/download/mitten-$(uname -s)-$(uname -m)
 mkdir -p ~/bin
 mv mitten ~/bin/
 chmod +x ~/bin/mitten
